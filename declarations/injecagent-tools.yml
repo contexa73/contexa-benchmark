@@ -1,0 +1,88 @@
+# Semantic classification of the InjecAgent tools (17 user tools and 63 attacker-side tools), written once from the
+# tools' names and one-line summaries in data/tools.json. Same fair-play rules and same fields as agentdojo-tools.yml;
+# two more operations exist here: EXPORT (a bulk download of a person's data) and EXECUTE (runs a command).
+# Frozen before any benchmark result with a guard was looked at (freeze.json).
+version: 1
+tools:
+  # --- user tools (all of them read) ---
+  AmazonGetProductDetails:                      {operation: READ,       data: PUBLIC,   effect: NONE,             category: SHOPPING}
+  EvernoteManagerSearchNotes:                   {operation: READ,       data: PERSONAL, effect: NONE,             category: NOTES}
+  GitHubGetRepositoryDetails:                   {operation: READ,       data: PERSONAL, effect: NONE,             category: SOURCE_CODE}
+  GitHubGetUserDetails:                         {operation: READ,       data: PERSONAL, effect: NONE,             category: SOURCE_CODE}
+  GitHubSearchRepositories:                     {operation: READ,       data: PUBLIC,   effect: NONE,             category: SOURCE_CODE}
+  GmailReadEmail:                               {operation: READ,       data: PERSONAL, effect: NONE,             category: EMAIL}
+  GmailSearchEmails:                            {operation: READ,       data: PERSONAL, effect: NONE,             category: EMAIL}
+  GoogleCalendarGetEventsFromSharedCalendar:    {operation: READ,       data: PERSONAL, effect: NONE,             category: CALENDAR}
+  GoogleCalendarReadEvents:                     {operation: READ,       data: PERSONAL, effect: NONE,             category: CALENDAR}
+  ShopifyGetProductDetails:                     {operation: READ,       data: PUBLIC,   effect: NONE,             category: SHOPPING}
+  TeladocViewReviews:                           {operation: READ,       data: PUBLIC,   effect: NONE,             category: HEALTH}
+  TodoistSearchTasks:                           {operation: READ,       data: PERSONAL, effect: NONE,             category: TASKS}
+  TwilioGetReceivedSmsMessages:                 {operation: READ,       data: PERSONAL, effect: NONE,             category: TELEPHONY}
+  TwitterManagerGetUserProfile:                 {operation: READ,       data: PUBLIC,   effect: NONE,             category: SOCIAL}
+  TwitterManagerReadTweet:                      {operation: READ,       data: PUBLIC,   effect: NONE,             category: SOCIAL}
+  TwitterManagerSearchTweets:                   {operation: READ,       data: PUBLIC,   effect: NONE,             category: SOCIAL}
+  WebBrowserNavigateTo:                         {operation: READ,       data: PUBLIC,   effect: EXTERNAL,         category: WEB}
+
+  # --- attacker-side tools ---
+  AmazonViewSavedAddresses:                     {operation: READ,       data: PERSONAL, effect: NONE,             category: SHOPPING}
+  AmazonViewSavedPaymentMethods:                {operation: READ,       data: PERSONAL, effect: NONE,             category: PAYMENTS}
+  AugustSmartLockGrantGuestAccess:              {operation: ADMIN,      data: PERSONAL, effect: ACCOUNT_SECURITY, category: PHYSICAL_ACCESS}
+  AugustSmartLockUnlockDoor:                    {operation: ADMIN,      data: PERSONAL, effect: ACCOUNT_SECURITY, category: PHYSICAL_ACCESS}
+  AugustSmartLockViewAccessHistory:             {operation: READ,       data: PERSONAL, effect: NONE,             category: PHYSICAL_ACCESS}
+  BankManagerGetAccountInformation:             {operation: READ,       data: PERSONAL, effect: NONE,             category: PAYMENTS}
+  BankManagerPayBill:                           {operation: TRANSFER,   data: PERSONAL, effect: FINANCIAL,        category: PAYMENTS}
+  BankManagerSearchPayee:                       {operation: READ,       data: PERSONAL, effect: NONE,             category: PAYMENTS}
+  BankManagerTransferFunds:                     {operation: TRANSFER,   data: PERSONAL, effect: FINANCIAL,        category: PAYMENTS}
+  BinanceDeposit:                               {operation: TRANSFER,   data: PERSONAL, effect: FINANCIAL,        category: TRADING}
+  BinanceGetOrderHistory:                       {operation: READ,       data: PERSONAL, effect: NONE,             category: TRADING}
+  BinancePlaceOrder:                            {operation: TRANSFER,   data: PERSONAL, effect: FINANCIAL,        category: TRADING}
+  BinanceWithdraw:                              {operation: TRANSFER,   data: PERSONAL, effect: FINANCIAL,        category: TRADING}
+  CiscoUmbrellaCreatePolicy:                    {operation: ADMIN,      data: PERSONAL, effect: ACCOUNT_SECURITY, category: NETWORK_SECURITY}
+  CiscoUmbrellaGetLogDetails:                   {operation: READ,       data: PERSONAL, effect: NONE,             category: NETWORK_SECURITY}
+  CiscoUmbrellaUpdatePolicy:                    {operation: ADMIN,      data: PERSONAL, effect: ACCOUNT_SECURITY, category: NETWORK_SECURITY}
+  DeepfakeGeneratorGenerateAudioDeepfake:       {operation: WRITE,      data: PERSONAL, effect: EXTERNAL,         category: MEDIA}
+  DropboxGetItemMetadata:                       {operation: READ,       data: PERSONAL, effect: NONE,             category: FILES}
+  DropboxListFilesAndFolders:                   {operation: READ,       data: PERSONAL, effect: NONE,             category: FILES}
+  DropboxMoveItem:                              {operation: WRITE,      data: PERSONAL, effect: INTERNAL,         category: FILES}
+  EmergencyDispatchSystemCreateDispatchRequest: {operation: WRITE,      data: PERSONAL, effect: EXTERNAL,         category: EMERGENCY_SERVICES}
+  EpicFHIRDownloadFiles:                        {operation: EXPORT,     data: PERSONAL, effect: EXTERNAL,         category: HEALTH_RECORDS}
+  EpicFHIRGetPatientDetails:                    {operation: READ,       data: PERSONAL, effect: NONE,             category: HEALTH_RECORDS}
+  EpicFHIRManageAppointments:                   {operation: WRITE,      data: PERSONAL, effect: INTERNAL,         category: HEALTH_RECORDS}
+  EpicFHIRManageClinicalDocuments:              {operation: WRITE,      data: PERSONAL, effect: INTERNAL,         category: HEALTH_RECORDS}
+  EpicFHIRManagePatientRecords:                 {operation: WRITE,      data: PERSONAL, effect: INTERNAL,         category: HEALTH_RECORDS}
+  EvernoteManagerManageNoteSharingLevel:        {operation: SHARE,      data: PERSONAL, effect: EXTERNAL,         category: NOTES}
+  ExpediaSearchReservations:                    {operation: READ,       data: PERSONAL, effect: NONE,             category: TRAVEL_BOOKING}
+  FacebookManagerGetUserProfile:                {operation: READ,       data: PERSONAL, effect: NONE,             category: SOCIAL}
+  FacebookManagerSearchFriends:                 {operation: READ,       data: PERSONAL, effect: NONE,             category: SOCIAL}
+  FacebookManagerUpdateUserProfile:             {operation: WRITE,      data: PERSONAL, effect: INTERNAL,         category: SOCIAL}
+  FedExShipManagerManageShipment:               {operation: WRITE,      data: PERSONAL, effect: EXTERNAL,         category: LOGISTICS}
+  FedExShipManagerSearchShipment:               {operation: READ,       data: PERSONAL, effect: NONE,             category: LOGISTICS}
+  GitHubDeleteRepository:                       {operation: DELETE,     data: PERSONAL, effect: INTERNAL,         category: SOURCE_CODE}
+  GmailSendEmail:                               {operation: SEND,       data: PERSONAL, effect: EXTERNAL,         category: EMAIL}
+  GoogleHomeScheduleDeviceAction:               {operation: WRITE,      data: PERSONAL, effect: EXTERNAL,         category: SMART_HOME}
+  GoogleMapGetCurrentLocation:                  {operation: READ,       data: PERSONAL, effect: NONE,             category: LOCATION}
+  GoogleSearchGetSearchHistory:                 {operation: READ,       data: PERSONAL, effect: NONE,             category: WEB}
+  IndoorRobotGoToRoom:                          {operation: WRITE,      data: PERSONAL, effect: EXTERNAL,         category: ROBOTICS}
+  InvestmentManagerGetHoldingsInformation:      {operation: READ,       data: PERSONAL, effect: NONE,             category: INVESTMENTS}
+  NortonIdentitySafeAutoFillPersonalInfo:       {operation: SEND,       data: PERSONAL, effect: EXTERNAL,         category: CREDENTIALS}
+  NortonIdentitySafeDisableTwoFactorAuthentication: {operation: CREDENTIAL, data: PERSONAL, effect: ACCOUNT_SECURITY, category: CREDENTIALS}
+  NortonIdentitySafeSearchPasswords:            {operation: READ,       data: PERSONAL, effect: ACCOUNT_SECURITY, category: CREDENTIALS}
+  NortonIdentitySafeSharePassword:              {operation: SHARE,      data: PERSONAL, effect: EXTERNAL,         category: CREDENTIALS}
+  SlackLeaveChannel:                            {operation: WRITE,      data: PERSONAL, effect: INTERNAL,         category: TEAM_CHAT}
+  SpokeoDownloadPublicRecord:                   {operation: READ,       data: PUBLIC,   effect: NONE,             category: PEOPLE_SEARCH}
+  SpokeoSearchPeople:                           {operation: READ,       data: PUBLIC,   effect: NONE,             category: PEOPLE_SEARCH}
+  TDAmeritradeGetHoldingsInformation:           {operation: READ,       data: PERSONAL, effect: NONE,             category: INVESTMENTS}
+  TeladocAccessUserInfo:                        {operation: READ,       data: PERSONAL, effect: NONE,             category: HEALTH_RECORDS}
+  TeladocViewPrescriptions:                     {operation: READ,       data: PERSONAL, effect: NONE,             category: HEALTH_RECORDS}
+  TerminalExecute:                              {operation: EXECUTE,    data: PERSONAL, effect: EXTERNAL,         category: SYSTEM}
+  The23andMeDownloadData:                       {operation: EXPORT,     data: PERSONAL, effect: EXTERNAL,         category: GENETIC_DATA}
+  The23andMeGetGeneticData:                     {operation: READ,       data: PERSONAL, effect: NONE,             category: GENETIC_DATA}
+  The23andMeGetHealthRecommendations:           {operation: READ,       data: PERSONAL, effect: NONE,             category: GENETIC_DATA}
+  The23andMeShareData:                          {operation: SHARE,      data: PERSONAL, effect: EXTERNAL,         category: GENETIC_DATA}
+  The23andMeUpdateData:                         {operation: WRITE,      data: PERSONAL, effect: INTERNAL,         category: GENETIC_DATA}
+  TrafficControlGivePriorityToEmergencyVehicle: {operation: WRITE,      data: PERSONAL, effect: EXTERNAL,         category: TRAFFIC_CONTROL}
+  TrafficControlManageTrafficLightState:        {operation: WRITE,      data: PERSONAL, effect: EXTERNAL,         category: TRAFFIC_CONTROL}
+  TwilioGetPhoneNumberInfo:                     {operation: READ,       data: PUBLIC,   effect: NONE,             category: TELEPHONY}
+  VenmoListLinkedAccounts:                      {operation: READ,       data: PERSONAL, effect: NONE,             category: PAYMENTS}
+  VenmoWithdrawMoney:                           {operation: TRANSFER,   data: PERSONAL, effect: FINANCIAL,        category: PAYMENTS}
+  WebBrowserSearchHistory:                      {operation: READ,       data: PERSONAL, effect: NONE,             category: WEB}

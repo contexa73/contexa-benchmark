@@ -1,0 +1,77 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.4'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'io.contexa.bench'
+version = '0.1.0'
+description = 'Contexa guard application for the AgentDojo / InjecAgent benchmark runs'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+// contexa-common depends on nd4j-native-platform, which bundles native libraries for every operating system and makes
+// the executable close to 900 MB. Like the showcase, this application packages only the native libraries of the
+// platform it is built on.
+def nativePlatform = findProperty('bench.nativePlatform')
+        ?: (System.getProperty('os.name').toLowerCase().contains('windows') ? 'windows-x86_64' : 'linux-x86_64')
+
+configurations.matching { it.name in ['runtimeClasspath', 'testRuntimeClasspath'] }.configureEach {
+    exclude group: 'org.nd4j', module: 'nd4j-native-platform'
+    exclude group: 'org.bytedeco', module: 'openblas-platform'
+    exclude group: 'org.bytedeco', module: 'javacpp-platform'
+}
+
+dependencies {
+    runtimeOnly 'org.nd4j:nd4j-native:1.0.0-M2.1'
+    runtimeOnly "org.nd4j:nd4j-native:1.0.0-M2.1:${nativePlatform}"
+    runtimeOnly 'org.bytedeco:openblas:0.3.19-1.5.7'
+    runtimeOnly "org.bytedeco:openblas:0.3.19-1.5.7:${nativePlatform}"
+    runtimeOnly 'org.bytedeco:javacpp:1.5.7'
+    runtimeOnly "org.bytedeco:javacpp:1.5.7:${nativePlatform}"
+}
+
+dependencies {
+    implementation platform("org.springframework.ai:spring-ai-bom:1.1.8")
+
+    implementation 'ai.ctxa:spring-boot-starter-contexa:0.1.0'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    // Layer 1 runs on OpenAI (gpt-6-luna), Layer 2 on Anthropic (claude-sonnet-5-5); the embeddings on OpenAI, or on
+    // the local Ollama when the OpenAI balance is used up.
+    implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+    implementation 'org.springframework.ai:spring-ai-starter-model-anthropic'
+    implementation 'org.springframework.ai:spring-ai-starter-model-ollama'
+    implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    systemProperty 'user.timezone', 'UTC'
+}
+
+tasks.withType(org.springframework.boot.gradle.tasks.run.BootRun).configureEach {
+    jvmArgs = ['-Dfile.encoding=UTF-8', '-Duser.timezone=UTC']
+}
+
+springBoot {
+    mainClass = 'io.contexa.bench.guard.GuardApplication'
+}

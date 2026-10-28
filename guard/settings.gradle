@@ -1,0 +1,17 @@
+rootProject.name = 'contexa-bench-guard'
+
+// The Contexa core is used as source (the same way contexa-enterprise uses it); nothing under ../../contexa is changed.
+def contexaRoot = file('../../contexa')
+if (!contexaRoot.exists()) {
+    throw new GradleException('The Contexa core was not found at ' + contexaRoot)
+}
+includeBuild(contexaRoot) {
+    dependencySubstitution {
+        substitute(module('ai.ctxa:contexa-common')).using(project(':contexa-common'))
+        substitute(module('ai.ctxa:contexa-core')).using(project(':contexa-core'))
+        substitute(module('ai.ctxa:contexa-identity')).using(project(':contexa-identity'))
+        substitute(module('ai.ctxa:contexa-autoconfigure')).using(project(':contexa-autoconfigure'))
+        substitute(module('ai.ctxa:contexa-iam')).using(project(':contexa-iam'))
+        substitute(module('ai.ctxa:spring-boot-starter-contexa')).using(project(':spring-boot-starter-contexa'))
+    }
+}

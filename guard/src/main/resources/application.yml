@@ -1,0 +1,180 @@
+spring:
+  application:
+    name: contexa-bench-guard
+  profiles:
+    # The stage of the guard: C1 (host-owned), C2 or C3 (Contexa-owned; the profile section at the end of this file).
+    active: ${BENCH_TIER:C1}
+  # The application datasource holds the Spring AI vector store (bench_vector). Contexa refuses to share it with
+  # contexa.datasource (the engine database, bench_engine).
+  datasource:
+    url: ${BENCH_VECTOR_DB_URL:jdbc:postgresql://127.0.0.1:46500/bench_vector}
+    username: ${BENCH_DB_USER:bench}
+    password: ${BENCH_DB_PASSWORD:bench_pw}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 3000
+  data:
+    jpa:
+      repositories:
+        enabled: false
+  jpa:
+    open-in-view: false
+  sql:
+    init:
+      mode: never
+  mvc:
+    async:
+      request-timeout: 300s
+  ai:
+    model:
+      # The chat provider: openai, or anthropic when the OpenAI balance is used up (then also set BENCH_LAYER1_MODEL to
+      # claude-haiku-5-5). The embeddings: openai, or ollama (local) with the OpenAI balance used up.
+      chat: ${BENCH_CHAT_PROVIDER:openai}
+      embedding: ${BENCH_EMBEDDING_PROVIDER:openai}
+    openai:
+      api-key: ${OPENAI_API_KEY:}
+      chat:
+        options:
+          model: ${BENCH_CHAT_MODEL:gpt-5-nano}
+      embedding:
+        options:
+          model: ${BENCH_EMBEDDING_MODEL:text-embedding-3-small}
+          dimensions: ${BENCH_EMBEDDING_DIMENSIONS:1024}
+    anthropic:
+      # Only BENCH_ANTHROPIC_API_KEY is read: the user's ANTHROPIC_API_KEY is a short placeholder, not a key.
+      api-key: ${BENCH_ANTHROPIC_API_KEY:}
+      chat:
+        options:
+          model: ${BENCH_ANTHROPIC_CHAT_MODEL:claude-haiku-5-5}
+    # Local embeddings when the OpenAI balance is used up: mxbai-embed-large has the pgvector's 1024 dimensions.
+    ollama:
+      base-url: ${BENCH_OLLAMA_BASE_URL:http://127.0.0.1:11434}
+      embedding:
+        options:
+          model: ${BENCH_OLLAMA_EMBEDDING_MODEL:mxbai-embed-large}
+
+contexa:
+  enabled: true
+  # No Redis and no Kafka: the engine's state (decisions, restrictions) is kept in the process.
+  infrastructure:
+    mode: standalone
+  datasource:
+    url: ${BENCH_ENGINE_DB_URL:jdbc:postgresql://127.0.0.1:46500/bench_engine}
+    username: ${BENCH_DB_USER:bench}
+    password: ${BENCH_DB_PASSWORD:bench_pw}
+    isolation:
+      contexa-owned-application: false
+  security:
+    zerotrust:
+      mode: ENFORCE
+    tiered:
+      # The decision prompt bundle control D of the showcase runs.
+      prompt-bundle:
+        active: ${BENCH_PROMPT_BUNDLE:2026.10.27-v21.17}
+      # The model of each analysis layer, as the showcase's control D: Layer1 decides, Layer2 decides what Layer1 could
+      # not. A model id with no runtime binding runs on a copy of the primary chat model; one that cannot be made stops
+      # the start.
+      llm:
+        layer1:
+          model: ${BENCH_LAYER1_MODEL:gpt-6-luna}
+        layer2:
+          model: ${BENCH_LAYER2_MODEL:claude-sonnet-5-5}
+      layer1:
+        open-ai-reasoning-effort: low
+        max-output-tokens: 2048
+      layer2:
+        open-ai-reasoning-effort: low
+        max-output-tokens: 2560
+    plane:
+      context:
+        time-zone: UTC
+    evidence:
+      signing:
+        # Decision records and sealed evidence are signed with this key, so they stay verifiable after a restart.
+        # scripts/start-guard.sh generates a random key once (guard/.evidence-signing-key); the default below is a
+        # development-only constant for a start without the script.
+        active-key-id: bench-1
+        keys:
+          bench-1: ${BENCH_EVIDENCE_SIGNING_KEY:ZGV2LW9ubHktYmVuY2gtZ3VhcmQtZXZpZGVuY2Uta2V5LTAxMjM0NTY3ODk=}
+  llm:
+    bindings:
+      chat:
+        claude-sonnet-5-5:
+          bean-name: layer2AnthropicChatModel
+          provider: anthropic
+          model-id: claude-sonnet-5-5
+        # Layer 1 on Anthropic (BENCH_CHAT_PROVIDER=anthropic, BENCH_LAYER1_MODEL=claude-haiku-5-5): the engine cannot copy an
+        # Anthropic chat model for a layer model of its own, so the model needs a bean and a binding. With the chat
+        # provider OpenAI the bean does not exist and the engine logs that this binding names a missing bean.
+        claude-haiku-5-5:
+          bean-name: layer1AnthropicChatModel
+          provider: anthropic
+          model-id: claude-haiku-5-5
+          primary: true
+    # The OpenAI models that take max_completion_tokens and the reasoning effort (the core default covers gpt-5 and o).
+    model-capabilities:
+      openai:
+        max-completion-token-patterns: gpt-5.*,gpt-6.*,o[0-9].*
+        default-sampling-only-patterns: gpt-5.*,gpt-6.*,o[0-9].*
+    selection:
+      chat:
+        priority: ${BENCH_CHAT_PROVIDER:openai}
+      embedding:
+        priority: ${BENCH_EMBEDDING_PROVIDER:openai}
+  vectorstore:
+    pgvector:
+      dimensions: ${BENCH_EMBEDDING_DIMENSIONS:1024}
+      initialize-schema: true
+  saas:
+    enabled: false
+  pqa:
+    oss:
+      sealed-evidence:
+        # Every decision is sealed, so every verdict has its evidence package (default 1%).
+        sample-percent: 100
+server:
+  address: ${BENCH_BIND_ADDRESS:127.0.0.1}
+  port: ${BENCH_GUARD_PORT:19300}
+  forward-headers-strategy: none
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,contexacapabilities
+  endpoint:
+    health:
+      show-details: never
+bench:
+  guard:
+    tier: ${BENCH_TIER:C1}
+    agent-id: ${BENCH_AGENT_ID:bench-agent}
+    principal-prefix: bench-user-
+    purge-delay: ${BENCH_PURGE_DELAY:30s}
+    delegation:
+      # RECORD: the run's delegation is recorded in Contexa's delegation registry and the agent is registered, besides
+      # being stated on each request. ATTRIBUTES: it is only stated on each request (ctxa.delegation.* attributes).
+      mode: ${BENCH_DELEGATION_MODE:ATTRIBUTES}
+      validity: ${BENCH_DELEGATION_VALIDITY:30m}
+      sponsor: ${BENCH_AGENT_SPONSOR:bench-operator}
+logging:
+  level:
+    io.contexa.bench.guard: INFO
+---
+# Stages C2 and C3: Contexa owns authentication. The agent's call is authenticated by the access token of the engine's
+# authorization server (the person's token exchanged by the agent), so the engine's internal client needs a secret that
+# stays the same across restarts (scripts/start-guard.sh generates it once into guard/.oauth2-client-secret).
+spring:
+  config:
+    activate:
+      on-profile: C2 | C3
+contexa:
+  bridge:
+    ownership: CONTEXA_OWNED
+  auth:
+    state-type: OAUTH2
+    token-transport-type: HEADER
+    oauth2:
+      client-secret: ${BENCH_OAUTH2_CLIENT_SECRET:}
+      issuer-uri: http://127.0.0.1:${BENCH_GUARD_PORT:19300}
+      token-exchange-enabled: true

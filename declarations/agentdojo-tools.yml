@@ -1,0 +1,99 @@
+# Semantic classification of the AgentDojo tools (benchmark v1.2.2), written once from the tools' meaning alone.
+#
+# This is what the adopter of an agent declares about its own tools: what kind of operation a tool performs, whether it
+# touches personal data, and where its effect lands. The guard application turns it into the host's declarations
+# (@Protectable category/actions/importance/privileged/exportSensitive, objective contract operations).
+#
+# Fair-play rules (docs/agent/에이전트-공방시험체계-고도화-기획안.md 13.11):
+#  - written from tool names and descriptions only; no injection task, attack string or user-task ground truth was used;
+#  - frozen before any benchmark result with a guard was looked at (hand-made smoke calls of the C1 guard had been seen): freeze.json holds its sha256 and date; a later edit is a new version
+#    and every result file records the hash it ran with.
+#
+# operation: READ | WRITE | DELETE | SEND | SHARE | TRANSFER | RESERVE | CREDENTIAL | ADMIN
+# data:      PUBLIC (reference data anyone may read) | PERSONAL (the user's or company's own data)
+# effect:    NONE | INTERNAL (inside the user's own space) | EXTERNAL (reaches people or systems outside) |
+#            FINANCIAL (moves or commits money) | ACCOUNT_SECURITY (identity, credentials, membership)
+# category:  the business area the tool belongs to
+version: 1
+tools:
+  # --- banking ---
+  get_iban:                      {operation: READ,       data: PERSONAL, effect: NONE,             category: PAYMENTS}
+  send_money:                    {operation: TRANSFER,   data: PERSONAL, effect: FINANCIAL,        category: PAYMENTS}
+  schedule_transaction:          {operation: TRANSFER,   data: PERSONAL, effect: FINANCIAL,        category: PAYMENTS}
+  update_scheduled_transaction:  {operation: TRANSFER,   data: PERSONAL, effect: FINANCIAL,        category: PAYMENTS}
+  get_balance:                   {operation: READ,       data: PERSONAL, effect: NONE,             category: PAYMENTS}
+  get_most_recent_transactions:  {operation: READ,       data: PERSONAL, effect: NONE,             category: PAYMENTS}
+  get_scheduled_transactions:    {operation: READ,       data: PERSONAL, effect: NONE,             category: PAYMENTS}
+  read_file:                     {operation: READ,       data: PERSONAL, effect: NONE,             category: FILES}
+  get_user_info:                 {operation: READ,       data: PERSONAL, effect: NONE,             category: ACCOUNT}
+  update_password:               {operation: CREDENTIAL, data: PERSONAL, effect: ACCOUNT_SECURITY, category: ACCOUNT}
+  update_user_info:              {operation: WRITE,      data: PERSONAL, effect: INTERNAL,         category: ACCOUNT}
+
+  # --- slack ---
+  get_channels:                  {operation: READ,       data: PERSONAL, effect: NONE,             category: TEAM_CHAT}
+  add_user_to_channel:           {operation: ADMIN,      data: PERSONAL, effect: ACCOUNT_SECURITY, category: TEAM_CHAT}
+  read_channel_messages:         {operation: READ,       data: PERSONAL, effect: NONE,             category: TEAM_CHAT}
+  read_inbox:                    {operation: READ,       data: PERSONAL, effect: NONE,             category: TEAM_CHAT}
+  send_direct_message:           {operation: SEND,       data: PERSONAL, effect: EXTERNAL,         category: TEAM_CHAT}
+  send_channel_message:          {operation: SEND,       data: PERSONAL, effect: EXTERNAL,         category: TEAM_CHAT}
+  get_users_in_channel:          {operation: READ,       data: PERSONAL, effect: NONE,             category: TEAM_CHAT}
+  invite_user_to_slack:          {operation: ADMIN,      data: PERSONAL, effect: ACCOUNT_SECURITY, category: TEAM_CHAT}
+  remove_user_from_slack:        {operation: ADMIN,      data: PERSONAL, effect: ACCOUNT_SECURITY, category: TEAM_CHAT}
+  get_webpage:                   {operation: READ,       data: PUBLIC,   effect: EXTERNAL,         category: WEB}
+  post_webpage:                  {operation: SEND,       data: PERSONAL, effect: EXTERNAL,         category: WEB}
+
+  # --- travel: reference catalogue (public) ---
+  get_all_hotels_in_city:                       {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_hotels_prices:                            {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_rating_reviews_for_hotels:                {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_hotels_address:                           {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_all_restaurants_in_city:                  {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_cuisine_type_for_restaurants:             {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_restaurants_address:                      {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_rating_reviews_for_restaurants:           {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_dietary_restrictions_for_all_restaurants: {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_contact_information_for_restaurants:      {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_price_for_restaurants:                    {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  check_restaurant_opening_hours:               {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_all_car_rental_companies_in_city:         {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_car_types_available:                      {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_rating_reviews_for_car_rental:            {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_car_fuel_options:                         {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_car_rental_address:                       {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_car_price_per_day:                        {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  get_flight_information:                       {operation: READ, data: PUBLIC, effect: NONE, category: TRAVEL_CATALOG}
+  # --- travel: the user's own data and commitments ---
+  get_user_information:          {operation: READ,       data: PERSONAL, effect: NONE,             category: ACCOUNT}
+  reserve_hotel:                 {operation: RESERVE,    data: PERSONAL, effect: FINANCIAL,        category: TRAVEL_BOOKING}
+  reserve_car_rental:            {operation: RESERVE,    data: PERSONAL, effect: FINANCIAL,        category: TRAVEL_BOOKING}
+  reserve_restaurant:            {operation: RESERVE,    data: PERSONAL, effect: FINANCIAL,        category: TRAVEL_BOOKING}
+
+  # --- calendar (travel and workspace) ---
+  search_calendar_events:        {operation: READ,       data: PERSONAL, effect: NONE,             category: CALENDAR}
+  get_day_calendar_events:       {operation: READ,       data: PERSONAL, effect: NONE,             category: CALENDAR}
+  create_calendar_event:         {operation: WRITE,      data: PERSONAL, effect: EXTERNAL,         category: CALENDAR}
+  cancel_calendar_event:         {operation: DELETE,     data: PERSONAL, effect: EXTERNAL,         category: CALENDAR}
+  reschedule_calendar_event:     {operation: WRITE,      data: PERSONAL, effect: EXTERNAL,         category: CALENDAR}
+  add_calendar_event_participants: {operation: WRITE,    data: PERSONAL, effect: EXTERNAL,         category: CALENDAR}
+  get_current_day:               {operation: READ,       data: PUBLIC,   effect: NONE,             category: CALENDAR}
+
+  # --- email (travel and workspace) ---
+  send_email:                    {operation: SEND,       data: PERSONAL, effect: EXTERNAL,         category: EMAIL}
+  delete_email:                  {operation: DELETE,     data: PERSONAL, effect: INTERNAL,         category: EMAIL}
+  get_unread_emails:             {operation: READ,       data: PERSONAL, effect: NONE,             category: EMAIL}
+  get_sent_emails:               {operation: READ,       data: PERSONAL, effect: NONE,             category: EMAIL}
+  get_received_emails:           {operation: READ,       data: PERSONAL, effect: NONE,             category: EMAIL}
+  get_draft_emails:              {operation: READ,       data: PERSONAL, effect: NONE,             category: EMAIL}
+  search_emails:                 {operation: READ,       data: PERSONAL, effect: NONE,             category: EMAIL}
+  search_contacts_by_name:       {operation: READ,       data: PERSONAL, effect: NONE,             category: CONTACTS}
+  search_contacts_by_email:      {operation: READ,       data: PERSONAL, effect: NONE,             category: CONTACTS}
+
+  # --- cloud drive (workspace) ---
+  append_to_file:                {operation: WRITE,      data: PERSONAL, effect: INTERNAL,         category: FILES}
+  create_file:                   {operation: WRITE,      data: PERSONAL, effect: INTERNAL,         category: FILES}
+  delete_file:                   {operation: DELETE,     data: PERSONAL, effect: INTERNAL,         category: FILES}
+  share_file:                    {operation: SHARE,      data: PERSONAL, effect: EXTERNAL,         category: FILES}
+  search_files_by_filename:      {operation: READ,       data: PERSONAL, effect: NONE,             category: FILES}
+  get_file_by_id:                {operation: READ,       data: PERSONAL, effect: NONE,             category: FILES}
+  list_files:                    {operation: READ,       data: PERSONAL, effect: NONE,             category: FILES}
+  search_files:                  {operation: READ,       data: PERSONAL, effect: NONE,             category: FILES}
